@@ -1,2 +1,2 @@
-# blog
-Personal blog
+# Blog
+This is Jonathan Harrison's personal blog
