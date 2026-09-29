@@ -4,15 +4,8 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+Hi, I'm Jonathan. I'm a software engineer with 13+ years of experience, working across companies like Microsoft, Spotify and Tripadvisor. For the professional details, see my [LinkedIn](https://www.linkedin.com/in/jonjam/).
 
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
+This blog is where I write about whatever has caught my interest: cloud, architecture, engineering practices, Generative AI, mobile, testing, and anything else I end up tinkering with.
 
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
-
-[jekyll-organization]: https://github.com/jekyll
+Outside of work, I'm a huge PlayStation gamer. My trophy count is either impressive or a cry for help, and you can judge for yourself on my [stats page](https://myplaystats.com/profile/JonJam).

@@ -7,6 +7,7 @@ This is Jonathan Harrison's personal blog
 - [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
 - [Jekyll](https://jekyllrb.com/)
 - [Minima](https://github.com/jekyll/minima)
+- [Jekyll Feed](https://github.com/jekyll/jekyll-feed)
 
 # Development
 
