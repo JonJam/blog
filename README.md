@@ -18,3 +18,7 @@ This is Jonathan Harrison's personal blog
 ## Testing locally
 
 1. Follow the guidance in the [GitHub Pages documentation](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/testing-your-github-pages-site-locally-with-jekyll) to run the site locally.
+
+```bash
+bundle exec jekyll serve --baseurl="" --livereload
+```
