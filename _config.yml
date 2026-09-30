@@ -8,10 +8,8 @@ github_username: jonjam
 linkedin_username: jonjam
 
 # Site settings
-# baseurl: "/blog" # the subpath of your site, e.g. /blog
-# url: "jonjam.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "/blog" # the subpath of your site, e.g. /blog
+url: "jonjam.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Theme settings
 theme: minima
