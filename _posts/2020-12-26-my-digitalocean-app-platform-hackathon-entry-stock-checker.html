@@ -1,0 +1,12 @@
+---
+layout: post
+title: 'My DigitalOcean App Platform Hackathon entry: stock-checker'
+tag:
+- digitalocean
+- docker
+- go
+- golang
+- hackathons
+---
+
+<figure><img alt="" src="https://cdn-images-1.medium.com/max/1024/1*xMieexbseTR5zmk77qkkGw.png" /><figcaption>stock-checker running as a DigitalOcean App Platform work</figcaption></figure><p>Just a short cross-post to say I have entered the <a href="https://dev.to/devteam/announcing-the-digitalocean-app-platform-hackathon-on-dev-2i1k">DigitalOcean App Platform Hackathon</a>.</p><p>stock-checker is a golangapp that spawns a task every hour to check whether any of the following UK retailers have an Xbox Series X console in stock:</p><ul><li><a href="http://argos.co.uk/">Argos</a></li><li><a href="https://www.amazon.co.uk/">Amazon</a></li><li><a href="https://www.currys.co.uk">Currys</a></li><li><a href="https://game.co.uk">Game</a></li><li><a href="https://www.johnlewis.com/">John Lewis</a></li><li><a href="https://www.shopto.net/">Shopto</a></li><li><a href="https://www.smythstoys.com">Smyths</a></li></ul><p>This is done using a web automation library that navigates each site in a headless chromium browser.</p><p>If the app determines stock is available, a text message is sent using <a href="https://www.twilio.com">Twilio</a> to the configured mobile number.</p><p>The full details can be found over on <a href="https://t.co/TB2kUtUGf4?amp=1">DEV</a>.</p><p>The source can be found on <a href="https://github.com/JonJam/stock-checker">GitHub</a>.</p><img src="https://medium.com/_/stat?event=post.clientViewed&referrerSource=full_rss&postId=7efdb6e7e0af" width="1" height="1" alt="">
