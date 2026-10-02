@@ -15,22 +15,22 @@ excerpt: "Docker for Windows (Edge channel) now ships with Kubernetes, which mak
 <h4>Install Docker for Windows — Edge channel</h4>
 <p>If you haven’t already got Docker installed, you can follow the installation <a href="https://docs.docker.com/docker-for-windows/install/">instructions on the Docker documentation</a>; <strong>just make sure you choose the Edge channel.</strong></p>
 <p>If you already have Docker installed but are on the Stable channel, you can switch to the Edge channel by going to Settings and then the General tab.</p>
-<figure><img alt="Switching channels" src="https://cdn-images-1.medium.com/max/802/1*unh2YbuCcynne9_nbx0sGw.png"/><figcaption>Switching channels</figcaption></figure>
+<figure><img alt="Switching channels" src="{{ '/assets/images/kubernetes-development-environment-using-docker-on-windows-unh2YbuCcynne9_nbx0sGw.png' | relative_url }}"/><figcaption>Switching channels</figcaption></figure>
 <p>Just be aware of a few <a href="https://docs.docker.com/docker-for-windows/faqs/#questions-about-stable-and-edge-channels">things</a> when switching between channels.</p>
 <h4>Enabling Kubernetes</h4>
 <p>By default, Kubernetes support is disabled; to enable: go to Settings, select the Kubernetes tab and click the “Enable Kubernetes” checkbox.</p>
-<figure><img alt="Enabling Kubernetes" src="https://cdn-images-1.medium.com/max/829/1*_F03VIVjx0t7XBWDLmtqXQ.png"/><figcaption>Enabling Kubernetes</figcaption></figure>
+<figure><img alt="Enabling Kubernetes" src="{{ '/assets/images/kubernetes-development-environment-using-docker-on-windows-_F03VIVjx0t7XBWDLmtqXQ.png' | relative_url }}"/><figcaption>Enabling Kubernetes</figcaption></figure>
 <p>More information can be found <a href="https://docs.docker.com/docker-for-windows/#kubernetes">here</a>.</p>
 <h4>Setting the context</h4>
 <p>After installation is complete, in order to use <a href="https://kubernetes.io/docs/reference/kubectl/overview/">kubectl</a> to communicate with the cluster, you will need to set the current context. To view the kubeconfig settings, run:</p>
 <pre>kubectl config view</pre>
 <p>The output of this command will look something like the following (by the way, I also have minikube setup):</p>
-<figure><img alt="kubeconfig" src="https://cdn-images-1.medium.com/max/523/1*VCam0fvFmIaBU_SNND5Spg.png"/><figcaption>kubeconfig</figcaption></figure>
+<figure><img alt="kubeconfig" src="{{ '/assets/images/kubernetes-development-environment-using-docker-on-windows-VCam0fvFmIaBU_SNND5Spg.png' | relative_url }}"/><figcaption>kubeconfig</figcaption></figure>
 <p>Docker created a new context called docker-for-desktop. We need to use this one to communicate with docker’s Kubernetes cluster. My current context is minikube so to switch context, use the following command:</p>
 <pre>kubectl config use-context docker-for-desktop</pre>
 <h4>Good to go</h4>
 <p>If the previous steps went without a hitch, you should now be all set up and if you run:</p>
 <pre>kubectl version</pre>
 <p>You can see the server version for docker’s Kubernetes cluster:</p>
-<figure><img alt="kubectl version information" src="https://cdn-images-1.medium.com/max/842/1*z-iIKx6F7oyQImyBZMCm4w.png"/><figcaption>kubectl version information</figcaption></figure>
+<figure><img alt="kubectl version information" src="{{ '/assets/images/kubernetes-development-environment-using-docker-on-windows-z-iIKx6F7oyQImyBZMCm4w.png' | relative_url }}"/><figcaption>kubectl version information</figcaption></figure>
 <p>Have fun :)</p>

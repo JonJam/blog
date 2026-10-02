@@ -18,10 +18,10 @@ excerpt: "After six months building kubemob, a Kubernetes dashboard app for Andr
 <h3>An aside … introducing kubemob</h3>
 <p>Prior to diving into Xamarin Forms I was playing around with Kubernetes (which you can read more about <a href="https://itnext.io/building-a-kubernetes-deployment-pipeline-for-microsoft-bot-framework-part-1-ddbb9f6f1796">here</a>); this gave me the idea of building the equivalent of <a href="https://github.com/kubernetes/dashboard">Kubernetes Dashboard</a> as an Android and iOS app.</p>
 <p>When developing this application, I tried to closely match the Kubernetes Dashboard experience:</p>
-<figure><img alt="Clusters page" src="https://cdn-images-1.medium.com/max/720/1*-P2TVNgBV7NJAOYdX9yp6Q.png"/><figcaption>Clusters page</figcaption></figure>
-<figure><img alt="Cluster Overview page" src="https://cdn-images-1.medium.com/max/720/1*z1boC6rLwSJrtQnhtYHVMg.png"/><figcaption>Cluster Overview page</figcaption></figure>
-<figure><img alt="Pods page" src="https://cdn-images-1.medium.com/max/720/1*ndP7lqn-MH8sY9_gRD3XfQ.png"/><figcaption>Pods page</figcaption></figure>
-<figure><img alt="Pod Detail page" src="https://cdn-images-1.medium.com/max/720/1*TpugXxY_Yy8-EMF2WlfZKQ.png"/><figcaption>Pod Detail page</figcaption></figure>
+<figure><img alt="Clusters page" src="{{ '/assets/images/building-a-kubernetes-dashboard-using-xamarin-forms-P2TVNgBV7NJAOYdX9yp6Q.png' | relative_url }}"/><figcaption>Clusters page</figcaption></figure>
+<figure><img alt="Cluster Overview page" src="{{ '/assets/images/building-a-kubernetes-dashboard-using-xamarin-forms-z1boC6rLwSJrtQnhtYHVMg.png' | relative_url }}"/><figcaption>Cluster Overview page</figcaption></figure>
+<figure><img alt="Pods page" src="{{ '/assets/images/building-a-kubernetes-dashboard-using-xamarin-forms-ndP7lqn-MH8sY9_gRD3XfQ.png' | relative_url }}"/><figcaption>Pods page</figcaption></figure>
+<figure><img alt="Pod Detail page" src="{{ '/assets/images/building-a-kubernetes-dashboard-using-xamarin-forms-TpugXxY_Yy8-EMF2WlfZKQ.png' | relative_url }}"/><figcaption>Pod Detail page</figcaption></figure>
 <p>Currently the app just supports viewing Kubernetes resources, and only Kubernetes clusters within Microsoft Azure subscriptions. However in the future (when I get more time), I would like to add:</p>
 <ul><li>Search</li><li>The ability to create, edit and delete resources.</li><li>Support for other clouds including AWS and Google Cloud Platform.</li></ul>
 <h3>Architecture</h3>
