@@ -1,0 +1,50 @@
+---
+layout: post
+title: Azure Application Insights with App Service — ENABLE ALL THE THINGS
+tag:
+  - microsoft
+  - application-insights
+  - azure
+excerpt: "After a production issue that newer Application Insights features could have helped diagnose, here's my checklist for enabling them on an App Service: the Profiler, client-side monitoring and Snapshot Debugging."
+---
+
+<p>Recently I had to diagnose an issue with an <a href="https://www.asp.net/">ASP.NET</a> web application running in <a href="https://azure.microsoft.com/en-gb/services/app-service/">Azure App Service</a>; utilising <a href="https://azure.microsoft.com/en-gb/services/application-insights/">Azure Application Insights</a>. After resolving the issue, it came to light that some of the newer features of Application Insights could have helped me work out what was going on.</p>
+<p>After I went through the process of enabling these new features, I thought that I would put a list together, not only to remind myself in the future, but to help anyone else interested.</p>
+<h3>Getting started</h3>
+<p>As I mentioned I was working with an existing application, but if you are starting from scratch here is quick set up.</p>
+<h4>Infrastructure</h4>
+<p>This <a href="https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-overview">ARM</a> template creates an Azure App Service linked together with Azure Application Insights.</p>
+
+<script src="https://gist.github.com/JonJam/61437a94d376601ca7dcddc45a14e817.js"></script>
+
+<h4>Code</h4>
+<p>Keeping things simple, launch Visual Studio and create a new ASP.NET Web Application (.NET Framework) and choose MVC.</p>
+<p>Now we are ready to …</p>
+<figure><img alt="" src="{{ '/assets/images/azure-application-insights-with-app-service-enable-all-the-things-EM3uBqfXt3kQYHT1sDvGAA.jpeg' | relative_url }}"/></figure>
+<h3>Infrastructure — Enable the Application Insights Profiler</h3>
+<p>The <a href="https://docs.microsoft.com/en-us/azure/application-insights/app-insights-profiler">Application Insights Profiler</a> lets you view performance profiles of live requests that were served by an application. It also highlights the hot paths that use the most time.</p>
+<p>This is a <a href="https://azure.microsoft.com/en-gb/blog/azure-web-sites-extensions/">site extension</a> that you can add using ARM:</p>
+
+<script src="https://gist.github.com/JonJam/c5bc662a08849e4d51bf4cc3d5f457ad.js"></script>
+
+<p>This extension depends upon having an App Setting named APPINSIGHTS_INSTRUMENTATIONKEY with the <a href="https://docs.microsoft.com/en-us/azure/application-insights/app-insights-create-new-resource#copy-the-instrumentation-key">Instrumentation Key</a> as its value. Putting this altogether looks as follows:</p>
+
+<script src="https://gist.github.com/JonJam/cc4205eee7a621b0f737ba7c88b065d4.js"></script>
+
+<p><strong>NOTE </strong>— A depends on reference to the site extension has been added to the App Settings defintion. This has been added in order that the site extension gets installed before the App Settings are applied; since App Settings changes restart the App Service and this will cause the site extension install to be cancelled.</p>
+<h3>Code – Configure Application Insights</h3>
+<p>The ASP.NET project needs to be <a href="https://docs.microsoft.com/en-us/azure/application-insights/app-insights-asp-net">configured with Application Insights</a> which can be done using Visual Studio.</p>
+<p>Open the project with Visual Studio, and when loaded right click on the project and select the “Configure Application Insights…” option. A simple wizard should open up and just keep clicking next.</p>
+<p>This wizard does the following:</p>
+<ul><li>Installs the <a href="https://www.nuget.org/packages/Microsoft.ApplicationInsights.Web/">Microsoft.ApplicationInsights.Web</a> Nuget package.</li><li>Adds a configured <a href="https://docs.microsoft.com/en-us/azure/application-insights/app-insights-configuration-with-applicationinsights-config">ApplicationInsights.config</a> file.</li><li>Adds a custom <a href="https://docs.microsoft.com/en-us/azure/application-insights/app-insights-asp-net-exceptions#mvc">HandleErrorAttribute</a> to catch and log unhandled exceptions.</li><li>Configures the new attribute as a global filter.</li></ul>
+<h3>Code – Configure Application Insights for Web pages</h3>
+<p>Application Insights also allows monitoring at the client side which includes timings of page loads and AJAX calls, counts and details of browser exceptions and AJAX failures, as well as users and session counts.</p>
+<p>To set up, you just need to add the SDK to the Shared Layout page which is detailed <a href="https://docs.microsoft.com/en-gb/azure/application-insights/app-insights-javascript">here</a>.</p>
+<h3>Code – Enable Snapshot Debugging</h3>
+<p>I have saved the best for last – Snapshot debugging. When this is enabled, anytime an exception occurs (say in your production web app) it automatically collects a debug snapshot.</p>
+<p>You can then view this snapshot either in the Azure Portal or Visual Studio, it shows your code with all the state and variables at the moment the exception was thrown.</p>
+<p>The full setup guide can be found <a href="https://docs.microsoft.com/en-gb/azure/application-insights/app-insights-snapshot-debugger">here</a>.</p>
+<p>There you have it, all configured.</p>
+<p>If you want a quick way to do the above at Build 2018, Microsoft announced enhancements to the Azure Portal that allow you to easily enable the Profiler and Snapshot debugging, detailed <a href="https://azure.microsoft.com/en-us/blog/enhancements-in-application-insights-profiler-and-snapshot-debugger/">here</a>.</p>
+<h3>Extra– Use Release Annotations</h3>
+<p>One additional thing that you can do as part of your deployment process is to use <a href="https://docs.microsoft.com/en-us/azure/application-insights/app-insights-annotations">Release Annotations</a>. Release annotations appear in Metrics graph and can make it easy to see whether recent changes have had any effect on an application’s performance</p>

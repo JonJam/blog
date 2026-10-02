@@ -1,0 +1,29 @@
+---
+layout: post
+title: Configuration settings in Node with dotenv
+tag:
+  - nodejs
+  - configuration-management
+  - typescript
+excerpt: "How I keep secrets like a LUIS endpoint URL out of source control in a Node app, using dotenv to load a .env file into process.env during development."
+---
+
+<p>I am currently building a chatbot in Node which utilizes <a href="https://www.luis.ai">Microsoft’s Language Understanding Intelligence Service </a>(LUIS) to determine a user’s intent from their question or message.</p>
+<p>Using LUIS requires specifying a URL containing secrets in my chatbot application; therefore I should get this from a Node environment variable so it doesn’t appear in source control. I would say I am still new to Node development, so I thought I would research options for doing this.</p>
+<p>After researching, I settled on <a href="https://www.npmjs.com/package/dotenv">dotenv</a> due to its simplicity and popularity. dotenv is an npm module that loads environment variables from a .env file into process.env.</p>
+<p>To show how simple it is to use, I created a project over on my <a href="https://github.com/JonJam/configuration_dotenv">GitHub</a>; there are only two steps:</p>
+<h3>Create .env file</h3>
+<p>In the root directory of your project, create a file called .env. The contents of the file should be of the form NAME=VALUE on separate lines, in my example this is:</p>
+<pre>SECRET_KEY=My secret value</pre>
+<h3>Configure dotenv</h3>
+<p>Next in your application, you just need to import the dotenv module and configure it. To centralize access to configuration and configure dotenv, I created a module called <a href="https://github.com/JonJam/configuration_dotenv/blob/master/src/settings.ts">settings</a> show below:</p>
+<pre>declare function require(moduleName: string): any;
+
+if (process.env.NODE_ENV !== "production") {
+  const dotenv: any = require("dotenv");
+  dotenv.config();
+}
+
+export const secretKey = process.env.SECRET_KEY || "Fallback value";</pre>
+<p>You will notice that I wrapped the dotenv import with an if; this is an <a href="https://www.typescriptlang.org/docs/handbook/modules.html">conditional import in TypeScript</a> where dotenv is imported and configured only during development.</p>
+<p>Per this <a href="https://github.com/motdotla/dotenv/issues/110">issue</a> on the dotenv’s GitHub, in production environments it is advised to use the capabilities of the service you are using to configure environment variables rather than with dotenv. For example, with Docker I can specify configuration with the <a href="https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e-env-env-file">run </a>command or with <a href="https://docs.docker.com/compose/environment-variables/#passing-environment-variables-through-to-containers">Compose</a> to set SECRET_KEY.</p>

@@ -1,0 +1,24 @@
+---
+layout: post
+title: Validation using JavaScript decorators
+tag:
+  - typescript
+  - javascript
+  - validation
+  - decorators
+excerpt: "class-validator lets you define validation rules using decorators, much like C# Data Annotations. Here is how to set it up and use it in TypeScript."
+---
+
+<p>Whilst searching for a validation library to use in one of my projects, I came across the <a href="https://github.com/pleerock/class-validator">class-validator</a> module. After reading class-validators’s documentation and playing around with it, I really liked how easy it was to use and found it suited my needs well, so thought I would share.</p>
+<p>class-validator uses the popular <a href="https://github.com/chriso/validator.js">validator.js</a> module to actually perform validation but what sets it apart is how you define your validation which is with <a href="https://github.com/tc39/proposal-decorators">JavaScript decorators</a>. For anyone who has used C#, it is very familiar to using <a href="https://docs.microsoft.com/pt-br/dotnet/api/system.componentmodel.dataannotations?view=netframework-4.7">Data Annotations</a>.</p>
+<p>To cut to the chase over on my GitHub, there is a <a href="https://github.com/JonJam/validation_ts">sample </a>showing how to use class-validation in TypeScript. If you want to set it up for yourself then read on.</p>
+<h3>Setup</h3>
+<p>If you want to use class-validator with TypeScript, you need to enable Decorators. At the time of writing Decorators are an experimental feature and need to be enabled using a compiler flag; the <a href="https://www.typescriptlang.org/docs/handbook/decorators.html">TypeScript documentation</a> shows you to enable this with:</p>
+<pre>"experimentalDecorators": true</pre>
+<p>Now install class-validator with npm or yarn.</p>
+<h3>Defining the validation</h3>
+<p>With the setup complete, its time to define your validation using a class. The Site class I have defined represents a site in a Password Manager type app:</p>
+<figure><script src="https://gist.github.com/JonJam/2410a8ab8b67aed45e3a02b0a8496727.js"></script><figcaption>Site class with validation</figcaption></figure>
+<h3>Usage</h3>
+<p>Now to use this class, simply create an instance of it and then call the validate method from class-validator; this returns an array of validation errors which you can then use to display in a UI for example.</p>
+<figure><script src="https://gist.github.com/JonJam/5e4135b6806b887475c15985f80a6bbe.js"></script><figcaption>Calling validate</figcaption></figure>

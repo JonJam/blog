@@ -1,0 +1,31 @@
+---
+layout: post
+title: Getting started with TypeScript type definitions
+tag:
+  - typescript
+  - type-definitions
+  - npm
+excerpt: "How I wrote a complete TypeScript type definition for the themeparks npm module, using dts-gen to get started and dtslint to check it."
+---
+
+<p>For a new side project I am just beginning to work on, I plan on using the npm module <a href="https://www.npmjs.com/package/themeparks">themeparks</a> in an <a href="https://expressjs.com/">Express</a> app written in <a href="https://www.typescriptlang.org/index.html">TypeScript</a>. themeparks currently doesn’t have a type definition, but in order to use it with TypeScript I will need one.</p>
+<p>Now I could have just done the bare minimum as per the <a href="https://www.typescriptlang.org/docs/handbook/modules.html#shorthand-ambient-modules">TypeScript documentation</a>:</p>
+<pre>declare module "themeparks"</pre>
+<p>However I know that I am going to be using themeparks extensively so I thought investing some time upfront to create a complete type definition would pay returns later. Also since I hadn’t written a type definition before, I thought it would be fun to give it a go.</p>
+<p>After a couple of days work (on and off) and some initial reading around, I completed it (or one that would be good enough for now) which you can find <a href="https://github.com/JonJam/types-themeparks">here</a>.</p>
+<p>For anyone who wants to know how to get started, here are the tools I used.</p>
+<h3>dts-gen</h3>
+<p><a href="https://github.com/Microsoft/dts-gen">dts-gen</a> is a command line tool written by Microsoft that generates a TypeScript definition file from any JavaScript object e.g an NPM module or a file. It can also generate the folder structure and files required if you wanted to contribute to <a href="https://github.com/DefinitelyTyped/DefinitelyTyped">DefinitelyTyped</a>.</p>
+<p>For example to create a starting point for the themeparks type definition, the pre-requisites are:</p>
+<ul><li>Install dts-gen globally.</li><li>Install themeparks globally.</li><li>Create a folder structure: myproject &gt;types &gt; themeparks <strong>(Note: if you don’t have this folder structure, then dts-gen will crash with “Error: ENOENT: no such file or directory”)</strong></li></ul>
+<p>Then run the following with myproject being the current working directory:</p>
+<pre>dts-gen -m themeparks -d themeparks -o</pre>
+<p>This is great as it means you don’t have to start completely from scratch; the only downside is that as dts-gen works by examining the objects at runtime, you will get a lot of any’s.</p>
+<h3>dtslint</h3>
+<p><a href="https://github.com/Microsoft/dtslint">dtslint</a> is a linter for type definition files (built on top of <a href="https://palantir.github.io/tslint/">tslint</a>) by Microsoft. Like any other linter, dtslint tests a type definition for style and correctness and if you used dts-gen, the majority of the setup is already done for you.</p>
+<p>Just install dtslint globally, write some tests and then run:</p>
+<pre>dtslint types/themeparks</pre>
+<p>You should see some linting errors. On the other hand, you may get some errors such as “Expected strictFunctionTypes: true”; to solve these just add the property to the tsconfig.json.</p>
+<h3>Other resources</h3>
+<p>That’s all the tools but if you want to find out more about type definitions then have at look the <a href="https://github.com/DefinitelyTyped/DefinitelyTyped">DefinitelyTyped documentation</a> which details common mistakes and how to publish a definition.</p>
+<p>Also the <a href="https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html">TypeScript documentation</a> provides a lot of declaration examples and Do’s and Dont’s, which come in handy when developing your type definition.</p>

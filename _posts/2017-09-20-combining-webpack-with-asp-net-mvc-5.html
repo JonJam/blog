@@ -1,0 +1,59 @@
+---
+layout: post
+title: Combining webpack with ASP.NET MVC 5
+tag:
+  - webpack
+  - asp-net-mvc
+  - typescript
+  - dotnet
+  - visual-studio
+excerpt: "How we combined webpack with ASP.NET MVC 5 to get an npm, TypeScript and LESS pipeline, plus the steps to recreate the template from scratch."
+---
+
+<p>I am currently working on an <a href="https://docs.microsoft.com/en-us/aspnet/mvc/mvc5">ASP.NET MVC 5</a> web application in <a href="https://www.visualstudio.com/vs/whatsnew/">Visual Studio 2017 </a>with my colleague <a href="https://github.com/matthewygf">matthewygf</a>; on other recent projects we have been using a typical JavaScript Single Page Application (SPA) stack e.g. <a href="https://www.npmjs.com/">npm</a>, <a href="https://gulpjs.com/">gulp</a>, etc.</p>
+<p>Even though ASP.NET MVC 5 and Visual Studio includes everything needed for development i.e. package management with <a href="https://www.nuget.org/">NuGet</a>, <a href="https://www.typescriptlang.org/">TypeScript</a> and <a href="http://lesscss.org/">LESS</a> compiling, bundling and minification etc; we wanted a development pipeline such that if we ever decided to move to a SPA, reuse it on other new projects or replace gulp on others we could.</p>
+<p>This lead us to build a “hybrid” combining <a href="https://webpack.js.org/">webpack</a> with ASP.NET MVC 5; it suits our needs very well so we thought we would share our template.</p>
+<p>The complete project is over on <a href="https://github.com/JonJam/aspnet_with_webpack">GitHub</a> if you just want to download it and start using it, otherwise you can create it from scratch by following these steps.</p>
+<h3>Create an ASP.NET Web Application project</h3>
+<p>First of all <a href="https://docs.microsoft.com/en-us/aspnet/mvc/overview/getting-started/introduction/getting-started">create an ASP.NET MVC Web application project in Visual Studio</a>. Specifically we used:</p>
+<ul><li>.NET Framework 4.6.1</li><li>MVC</li><li>Authentication: No Authentication</li></ul>
+<h3>Uninstall JavaScript and CSS NuGet packages</h3>
+<p>By default the ASP.NET MVC template includes Bootstrap and jQuery downloaded from NuGet. We want to use npm instead, so <a href="https://docs.microsoft.com/en-us/nuget/tools/package-manager-ui#uninstalling-a-package">uninstall the following NuGet packages</a>:</p>
+<ul><li>bootstrap</li><li>jQuery</li><li>jQuery.Validation</li><li>Microsoft.jQuery.Unobstrusive.Validation</li><li>Modernizr</li><li>Respond</li></ul>
+<p>After uninstalling the packages, make sure the Fonts and Scripts folders are deleted and also,the Content folder only contains Site.css.</p>
+<h3>Create package.json and install dependencies</h3>
+<p>Now that we have a clean starting point, in the project folder open a terminal and run.</p>
+<pre>npm init</pre>
+<p>Just accept all the default values and then you will have a package.json file created. After that its time to use:</p>
+<pre>npm install --save</pre>
+<p>To install the following packages:</p>
+<ul><li>bootstrap</li><li>jquery</li><li>jquery-validation</li><li>jquery-validation-unobtrusive</li></ul>
+<p>With the main dependencies installed, we need to install the development dependencies which includes webpack and other to support TypeScript and LESS. Use:</p>
+<pre>npm install -D</pre>
+<p>To install the following packages:</p>
+<ul><li>@types/bootstrap</li><li>@types/jquery</li><li>@types/jquery-validation-unobtrusive</li><li>@types/jquery.validation</li><li>awesome-typescript-loader</li><li>clean-webpack-plugin</li><li>css-loader</li><li>extract-text-webpack-plugin</li><li>file-loader</li><li>html-loader</li><li>html-webpack-plugin</li><li>less</li><li>less-loader</li><li>source-map-loader</li><li>style-loader</li><li>typescript</li><li>webpack</li><li>webpack-merge</li></ul>
+<h3>Create src folder</h3>
+<p>All the dependencies are installed so create a folder called src in the root of the ASP.NET MVC project; this folder will contain all the TypeScript and LESS source files.</p>
+<p>After creating the folder, move the Site.css file from the Content folder to src and rename it index.less. Open the index.less file and at the top add this:</p>
+<pre>@import "../node_modules/bootstrap/less/bootstrap.less";</pre>
+<p>This will make the bootstrap classes and styles available across our application.</p>
+<p>Now create a index.ts file and add the following to it:</p>
+<pre>import "./index.less";
+import "bootstrap";</pre>
+<p>This imports the LESS file we just created and also bootstrap in order that bootstrap components such as the navigation bar work as expected.</p>
+<h3>Modify _Layout.cshtml</h3>
+<p>As per webpack’s <a href="https://webpack.js.org/guides/production/">best practices for production</a>, our production webpack configuration will generate multiple bundles each having a unique name every time they build. webpack can inject tags for these generated files into a HTML file, we will use the MVC shared layout file for this.</p>
+<p>First of all rename the _Layout.cshtml file in Views/Shared to _Layout_Template.cshtml; this is because webpack will generate _Layout.cshtml from _Layout_Template.cshtml with the script and link tags appended at the end of the body element.</p>
+<h3>Create tsconfig.json</h3>
+<p>To support TypeScript compilation, you will need to create a <a href="https://www.typescriptlang.org/docs/handbook/tsconfig-json.html">tsconfig.json</a> file at the root of the ASP .NET project. This file specifies the root files and the compiler options required to compile the TypeScript files. Simply copy the file from over on the GitHub project: <a href="https://raw.githubusercontent.com/JonJam/aspnet_with_webpack/master/AspAndWebpack/tsconfig.json">tsconfig.json</a>.</p>
+<h3>Create webpack configuration files</h3>
+<p>Now its time to create the webpack configuration files, create these at the root of the ASP .NET project. Simply copy the files from over on the GitHub project: <a href="https://raw.githubusercontent.com/JonJam/aspnet_with_webpack/master/AspAndWebpack/webpack.common.js">webpack.common.js</a>, <a href="https://raw.githubusercontent.com/JonJam/aspnet_with_webpack/master/AspAndWebpack/webpack.dev.js">webpack.dev.js</a>, <a href="https://raw.githubusercontent.com/JonJam/aspnet_with_webpack/master/AspAndWebpack/webpack.prod.js">webpack.prod.js</a></p>
+<h3>Running webpack</h3>
+<p>Now that everything is setup, we just need to run webpack. We can use npm scripts to do this, so in your package.json add the following:</p>
+<pre>"scripts": {
+"build:dev": "webpack --config webpack.dev.js",
+"build:prod": "webpack --config webpack.prod.js"
+}</pre>
+<p>You will need to be run build:dev for example every time you build your ASP.NET project. This can be done by using the <a href="https://marketplace.visualstudio.com/items?itemName=MadsKristensen.NPMTaskRunner">NPM Task Runner extension</a> for Visual Studio, where you can setup a binding for BeforeBuild to run build:dev.</p>
+<p>After you have configured the extension, every time you build it runs the selected script. Note — this will only work in Visual Studio not on a build server; for a build server you will need to run these npm scripts manually.</p>
+<p>If you followed all the steps above or grabbed the code from GitHub, just run the project and you will see the same old ASP.NET bootstrap starter site.</p>

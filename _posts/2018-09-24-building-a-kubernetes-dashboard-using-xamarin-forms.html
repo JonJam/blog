@@ -1,0 +1,93 @@
+---
+layout: post
+title: Building a Kubernetes dashboard using Xamarin Forms
+tag:
+  - cross-platform
+  - xamarin
+  - xamarin-forms
+  - kubernetes
+excerpt: "After six months building kubemob, a Kubernetes dashboard app for Android and iOS, I share the architecture patterns, performance tips and UI components that helped most along the way."
+---
+
+<p>On and off over the past 6 months, I have been living in the world of <a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/">Xamarin Forms</a> to build a cross platform mobile app; with the plan to move to learning native Android and iOS development afterwards.</p>
+<p>For those who haven’t come across <a href="https://visualstudio.microsoft.com/xamarin/">Xamarin</a> before, it is a cross platform technology from Microsoft that allows you to build native Android and iOS applications using C# and .NET. Xamarin Forms provides a UI toolkit allowing you to define UI code for both platforms.</p>
+<p>I really liked using Xamarin Forms for what I was building, but just found every now and again you had to deal with some pain like:</p>
+<ul><li>Upgrading Android Support NuGet Packages.</li><li>Debugging exceptions that give no detail.</li><li>Working out why XAML fails to compile.</li></ul>
+<p>But you have to forgive it, given what magic Xamarin is doing under the covers.</p>
+<p>Anyway during that time I read pretty much all the documentation and came across useful resources that showed me the right direction to, so I thought I would share them.</p>
+<h3>An aside … introducing kubemob</h3>
+<p>Prior to diving into Xamarin Forms I was playing around with Kubernetes (which you can read more about <a href="https://itnext.io/building-a-kubernetes-deployment-pipeline-for-microsoft-bot-framework-part-1-ddbb9f6f1796">here</a>); this gave me the idea of building the equivalent of <a href="https://github.com/kubernetes/dashboard">Kubernetes Dashboard</a> as an Android and iOS app.</p>
+<p>When developing this application, I tried to closely match the Kubernetes Dashboard experience:</p>
+<figure><img alt="Clusters page" src="{{ '/assets/images/building-a-kubernetes-dashboard-using-xamarin-forms-P2TVNgBV7NJAOYdX9yp6Q.png' | relative_url }}"/><figcaption>Clusters page</figcaption></figure>
+<figure><img alt="Cluster Overview page" src="{{ '/assets/images/building-a-kubernetes-dashboard-using-xamarin-forms-z1boC6rLwSJrtQnhtYHVMg.png' | relative_url }}"/><figcaption>Cluster Overview page</figcaption></figure>
+<figure><img alt="Pods page" src="{{ '/assets/images/building-a-kubernetes-dashboard-using-xamarin-forms-ndP7lqn-MH8sY9_gRD3XfQ.png' | relative_url }}"/><figcaption>Pods page</figcaption></figure>
+<figure><img alt="Pod Detail page" src="{{ '/assets/images/building-a-kubernetes-dashboard-using-xamarin-forms-TpugXxY_Yy8-EMF2WlfZKQ.png' | relative_url }}"/><figcaption>Pod Detail page</figcaption></figure>
+<p>Currently the app just supports viewing Kubernetes resources, and only Kubernetes clusters within Microsoft Azure subscriptions. However in the future (when I get more time), I would like to add:</p>
+<ul><li>Search</li><li>The ability to create, edit and delete resources.</li><li>Support for other clouds including AWS and Google Cloud Platform.</li></ul>
+<h3>Architecture</h3>
+<p>This section focuses on the architecture of the app including design patterns.</p>
+<h4>Model View View Model (MVVM)</h4>
+<p>Xamarin Forms is built around the MVVM pattern and is pretty much unavoidable.</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/enterprise-application-patterns/mvvm">The Model-View-ViewModel Pattern - Xamarin</a></p>
+<p>Xamarin provide a great deal of useful code sample to facilitate using MVVM which includes:</p>
+<ul><li><a href="https://github.com/JonJam/kubemob/blob/master/KubeMob/KubeMob.Common/ViewModels/Base/ExtendedBindableObject.cs">ExtendedBindableObject</a> — a class that extends Xamarin Form’s built in <a href="https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.inotifypropertychanged?view=netframework-4.7.2">INotifyPropertyChanged</a> implementation with syntactic sugar.</li><li><a href="https://github.com/JonJam/kubemob/blob/master/KubeMob/KubeMob.Common/ViewModelLocator.cs">ViewModelLocator</a> — this automatically creates the corresponding view model for a page and sets its binding context. It also provides the means for a view model to do any initialization work, before it’s page is displayed.</li><li><a href="https://github.com/JonJam/kubemob/blob/master/KubeMob/KubeMob.Common/Behaviors/EventToCommandBehavior.cs">EventToCommandBehavior</a> — this behavior allows you to bind <a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.input.icommand?view=netframework-4.7.2">ICommands</a> to view events, allowing you to be a “MVVM purest”.</li></ul>
+<h4>Dependency injection</h4>
+<p>Using a dependency injection (DI) container goes hand in hand with using a ViewModelLocator, and provides the same benefits as when used elsewhere such as facilitating testability.</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/enterprise-application-patterns/dependency-injection">Dependency Injection - Xamarin</a></p>
+<p>I know there are many DI containers out there, but I chose to go with ASP NET Core’s default dependency injection framework. The reason is that Microsoft.Extensions.DependencyInjection is very easy to setup and is not bloated with hundreds of features that I won’t use like <a href="https://autofac.org/">Autofac</a>.</p>
+<p><a href="https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/">Microsoft.Extensions.DependencyInjection 5.0.1</a></p>
+<h4>Navigation service</h4>
+<p>Again in trying to be pure MVVM, view models shouldn't know about UI specifics. In the case of Xamarin Forms, navigation is done by manipulating a stack of page types.</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/enterprise-application-patterns/navigation">Enterprise App Navigation - Xamarin</a></p>
+<p>To abstract navigation away, I created a <a href="https://github.com/JonJam/kubemob/blob/master/KubeMob/KubeMob.Common/Services/Navigation/NavigationService.cs">NavigationService</a> class but in contrast to the documentation I prefer to have explicit methods to navigate to pages; in contrast to using view model types to drive which page to go to.</p>
+<h4>Configuration</h4>
+<p>The <a href="https://github.com/JonJam/kubemob/blob/master/KubeMob/KubeMob.Common/Services/Settings/AppSettings.cs">AppSettings</a> class contains all the user settings used throughout kubemob; this follows the configuration management pattern discussed here:</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/enterprise-application-patterns/configuration-management">Configuration Management - Xamarin</a></p>
+<h4>Validation</h4>
+<p>When a user tries to add an Azure account, validation is performed to ensure that all entries are populated.</p>
+<p>Any errors that occur need to be feedback to the user and the setup shown on the following link, is easily expandable for any validation rule you can think of.</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/enterprise-application-patterns/validation">Validation in Enterprise Apps - Xamarin</a></p>
+<h4>Localization</h4>
+<p>Although I’m not supporting multiple languages currently, I think it’s best to set it up from the beginning as in the long run, it will save a lot of time and work later on when you do have to support other languages.</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/localization/text?tabs=vswin#overview">String and Image Localization - Xamarin</a></p>
+<h3>Performance</h3>
+<p>This section focuses on techniques you can do to improve performance of an application and decrease the app size.</p>
+<h4>Enable XAML compilation</h4>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/xaml/xamlc">XAML compilation</a> is a feature in Xamarin Forms that enables compile time checking of XAML and it also removes some of the load and instantiation time, as well as reduces the final app size.</p>
+<p>You can enable it app-wide by adding the <a href="https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.xaml.xamlcompilationattribute?view=xamarin-forms">XamlCompilation </a>attribute to <a href="https://github.com/JonJam/kubemob/blob/master/KubeMob/KubeMob.Common/App.xaml.cs">App.xaml.cs</a></p>
+<h4>Configure the linker (and other tips)</h4>
+<p>There are a great number of tips to improve the performance of your Xamarin Android or iOS applications as discussed here.</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/cross-platform/deploy-test/memory-perf-best-practices">Cross-Platform Performance - Xamarin</a></p>
+<p>One of the most notable is the Linker which can help reduce the size of the application by removing unused code.</p>
+<p>One recommendation I have is to enable Link All from day one, even in Debug mode. The reason I recommend this is that it enables you to catch any errors during development, when the Linker actually removes code that is required.</p>
+<p>If its your code you can use the <a href="https://docs.microsoft.com/en-us/xamarin/ios/deploy-test/linker?tabs=vsmac#preserving-code">PreserveAttribute</a> to ensure the code isn’t removed; whereas if its a NuGet package you can specify in the project settings for Linker to ignore certain assemblies(<a href="https://docs.microsoft.com/en-us/xamarin/ios/deploy-test/linker?tabs=vsmac#skipping-assemblies">Android</a> / <a href="https://docs.microsoft.com/en-us/xamarin/ios/deploy-test/linker?tabs=vsmac#skipping-assemblies">iOS</a>).</p>
+<h4>List view performance</h4>
+<p>kubemob uses quite a few list views to display data throughout the application and if you aren’t careful, they can appear sluggish.</p>
+<p>There are number of different techniques discussed here to ensure any list views stay responsive.</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/user-interface/listview/performance">ListView Performance - Xamarin</a></p>
+<h4>Use layout compression</h4>
+<p>When you have complicated layouts, you can improve the page rendering performance by using layout compression.</p>
+<p>This aims to flatten the view nesting by removing specified layouts from the visual tree.</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/user-interface/layouts/layout-compression">Layout Compression - Xamarin</a></p>
+<h4>Use native HttpClient and SSL/TLS stacks</h4>
+<p>By default, for compatibility reasons, Xamarin Forms uses the HTTP stack from .NET.</p>
+<p>However the native stacks have increased performance and by using them help decrease the overall app size, so its recommended to switch to the native stacks.</p>
+<ul><li><a href="https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/http-stack?tabs=windows">HttpClient Stack and SSL/TLS Implementation Selector for Android - Xamarin</a></li><li><a href="https://docs.microsoft.com/en-us/xamarin/cross-platform/macios/http-stack">HttpClient and SSL/TLS Implementation Selector for iOS/macOS - Xamarin</a></li></ul>
+<h4>Android — Use fast renderers</h4>
+<p>Due to the way the original control renderers on Android work, they have a performance implication due to each control being composed of two views.</p>
+<p>To resolve this, fast renderers can be enabled which improve performance by creating fewer objects.</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/internals/fast-renderers">Xamarin.Forms Fast Renderers - Xamarin</a></p>
+<h4>iOS — Use LLVM code generation engine</h4>
+<p>During the build of a Xamarin Forms application, code is generated for the target platform.</p>
+<p>On iOS, you can switch the code generation engine to use LLVM which produces both faster and tighter code than the Mono engine does, at the cost of longer compile times.</p>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/ios/deploy-test/compiling-for-different-devices?tabs=vsmac#code-generation-engine">Compiling for Different Devices in Xamarin.iOS - Xamarin</a></p>
+<h3>UI</h3>
+<p>This final section discusses re-usable components that can help make developing Xamarin Forms UIs easier.</p>
+<h4>EffectBehavior</h4>
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/behaviors/reusable/effect-behavior">EffectBehavior</a> in the Xamarin documentation simplifies the boilerplate code you have to write to apply an <a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/effects/introduction">Effect</a> to a control; <a href="https://github.com/JonJam/kubemob/blob/master/KubeMob/KubeMob.Common/Behaviors/EffectBehavior.cs">kubemob’s version</a> extends it with support for adding an Effect based on a bindable condition.</p>
+<p>This came in handy when adding a validation error effect to invalid entries in a form.</p>
+<h4>ItemsControl</h4>
+<p>If you come from a <a href="https://docs.microsoft.com/en-us/visualstudio/designers/getting-started-with-wpf?view=vs-2017">WPF</a> background, you might end up looking for an ItemsControl. There is no built in one in Xamarin Forms, however there is a <a href="https://docs.microsoft.com/en-us/xamarin/cross-platform/desktop/controls/wpf#itemscontrol">sample one</a> in the Xamarin University Infrastructure library on GitHub.</p>
+<h4>WrapLayout</h4>
+<p>Similarly to ItemsControl, the Xamarin University Infrastructure library also provides a <a href="https://github.com/xamarinhq/xamu-infrastructure/blob/master/src/XamU.Infrastructure/Layout/WrapLayout.cs">WrapLayout</a> implementation.</p>
+<p>I hope you found these resources useful as I did and if there are any you think I have missed, please do let me know.</p>

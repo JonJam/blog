@@ -1,0 +1,23 @@
+---
+layout: post
+title: Writing npm scripts using TypeScript
+tag:
+  - nodejs
+  - npm
+  - typescript
+  - ts-node
+excerpt: "When a build script outgrows a one-liner in package.json, ts-node lets you write it in TypeScript and keep the same rules and checks as the rest of your project."
+---
+
+<p>In my <a href="https://www.typescriptlang.org/">TypeScript </a>projects I have been using <a href="https://docs.npmjs.com/misc/scripts">npm scripts</a> for the development and build pipelines.</p>
+<blockquote>As a side note — if you are using gulp or grunt, you should check out this <a href="https://medium.freecodecamp.org/why-i-left-gulp-and-grunt-for-npm-scripts-3d6853dd22b8">blog post</a> about the reasons why to move to npm scripts.</blockquote>
+<p>Typically my scripts have been defined in my package.json and simply call CLI tools. Recently I was working with <a href="https://github.com/typicode/json-server">json-server</a> and <a href="https://github.com/json-schema-faker/json-schema-faker">json-schema-faker</a> (view this <a href="https://medium.com/@jonjam/creating-a-fake-rest-api-with-json-server-817320239cde">blog post</a> to find out more) and I needed to do more than what would fit elegantly into a single line in package.json. I could have used a JavaScript file, since I don’t really need the full power of TypeScript for a build script. However I wanted to be consistent across my project and have the same rules/checks performed on all my code.</p>
+<p>To use TypeScript to define your build scripts, you can use the <a href="https://www.npmjs.com/package/ts-node">ts-node</a> module. ts-node is a TypeScript execution environment and REPL for node, meaning you can use a TypeScript file in place of any JavaScript file.</p>
+<p>First of all, install ts-node and typescript (which ts-node depends on) with:</p>
+<pre>yarn install -D ts-node typescript</pre>
+<p>Now with the modules installed, you can create a npm script like the following:</p>
+<pre>"start" : "ts-node ./buildScripts/start.ts"</pre>
+<p>And run it with:</p>
+<pre>yarn start</pre>
+<p>That’s it! An example project with all this setup can be found on my <a href="https://github.com/JonJam/typescript_npm_scripts">GitHub</a>.</p>
+<p>One thing I did come across is that your tsconfig.json needs to have module format set to <em>“commonjs” </em>for ts-node to work correctly; otherwise you will get the error “<em>SyntaxError: Unexpected token import”. </em>If you want to use a different module format in the rest of your code, you could use a separate tsconfig.json for the build scripts, this is demonstrated in my <a href="https://github.com/JonJam/typescript_npm_scripts">example project</a>.</p>
