@@ -1,13 +1,361 @@
 ---
 layout: post
-title: Building a Kubernetes deployment pipeline for Microsoft Bot Framework – Part
+title:
+  Building a Kubernetes deployment pipeline for Microsoft Bot Framework – Part
   2
 tag:
-- helm
-- microsoft-bot-framework
-- azure
-- bots
-- kubernetes
+  - helm
+  - microsoft-bot-framework
+  - azure
+  - bots
+  - kubernetes
+excerpt: "Part 2 covers building and deploying the bot itself: creating a Helm chart, adding NGINX and Redis as dependencies, and shipping Docker images to Kubernetes with Travis CI."
 ---
 
-<figure><img alt="" src="https://cdn-images-1.medium.com/max/1024/1*TP76AT0J2Y8mwuZc5_LDlA.jpeg" /></figure><p>This is the second post in this series discussing how I set up an end to end Kubernetes deployment pipeline for a chat bot. If you missed part 1, you can check it out <a href="https://itnext.io/building-a-kubernetes-deployment-pipeline-for-microsoft-bot-framework-part-1-ddbb9f6f1796">here</a>.</p><p>Part 2 details the deployment of the theme park chat bot. All the code presented is available on my GitHub at: <a href="https://github.com/JonJam/themeparks-bot">themeparks-bot</a>.</p><h3>Tools</h3><p>In my previous post, I introduced the tools I used to create the infrastructure; for the bot I reused the majority of the tools with a few additions:</p><h4>Docker Hub</h4><p><a href="https://hub.docker.com/">Docker Hub</a> is a cloud container image registry. This is used to store the docker images built from every Travis CI build which are then used in Kubernetes.</p><p>I chose Docker Hub as it is free for public images and integrates out of the box with Kubernetes.</p><h4>Docker CLI</h4><p><a href="https://docs.docker.com/engine/reference/commandline/cli/">Docker CLI</a> is the command-line tool for managing docker containers and images. I used this to build the chat bot docker image and push it to Docker Hub.</p><h3>Creating the Helm chart</h3><p>In order to use <a href="https://helm.sh/">Helm</a> for deployment I had to create a <a href="https://docs.helm.sh/developing_charts/#charts">Chart</a>, this section details how I got started and shows the individual components that make up the chart.</p><h4>Getting started</h4><p>The Helm CLI provides a <a href="https://docs.helm.sh/helm/#helm-create">create</a> command to generate a skeleton chart with the required directory structure and files. This was run as follows:</p><pre>helm create themeparks-bot</pre><p>The output of this command is this folder structure:</p><pre>themeparks-bot/<br>  |<br>  |- .helmignore   # Contains patterns to ignore when packaging Helm charts.<br>  |<br>  |- Chart.yaml    # Information about your chart<br>  |<br>  |- values.yaml   # The default values for your templates<br>  |<br>  |- charts/       # Charts that this chart depends on<br>  |<br>  |- templates/    # The template files</pre><p>The main working area is the templates folder as this is where Kubernetes resources reside. In fact, the skeleton chart actually comes with example <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>, <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress</a> and <a href="https://kubernetes.io/docs/concepts/services-networking/service/">Service</a> templates.</p><h4>Creating the Values file</h4><p>Before I created the templates, I first of all modified the <a href="https://docs.helm.sh/chart_template_guide/#values-files">values.yaml</a> file. This contains the defaults for properties used in the templates.</p><iframe src="" width="0" height="0" frameborder="0" scrolling="no"><a href="https://medium.com/media/34c1e932be0ccce5e34c28fd3f7eacfc/href">https://medium.com/media/34c1e932be0ccce5e34c28fd3f7eacfc/href</a></iframe><p>There a number of best practices for Values files that I followed when making modifications (see the <a href="https://docs.helm.sh/chart_best_practices/#values">documentation</a>). A number of key ones are:</p><ul><li>Variables names should use camelcase.</li><li>A flat structure should be preferred, over nesting.</li><li>All properties should be documented.</li></ul><p>One thing to note it that I haven’t specified values for those under the secret property; this is because I pass this at deployment time, since they are values I don’t want in source control.</p><h4>Defining the templates</h4><p>Using the skeleton templates as a starting point, I modified and created additional templates for the chat bot.</p><p>Helm has a lot of general guidance around developing templates such as:</p><ul><li>Templates files should follow a naming convention of [Chart name]-[Kubernetes resource type].yaml e.g. themeparks-bot-deployment.yaml.</li><li>A template file should only contain a single Kubernetes resource (<a href="https://docs.helm.sh/chart_best_practices/#structure-of-templates">source</a>).</li><li>All resources should have the standard set of Helm labels (<a href="https://docs.helm.sh/chart_best_practices/#standard-labels">source</a>).</li><li>The include function should be used over the template function (<a href="https://docs.helm.sh/chart_template_guide/#the-include-function">source</a>).</li></ul><p>With these in mind here are the individual templates.</p><p><strong>_helpers</strong></p><p><a href="https://docs.helm.sh/chart_template_guide/#named-templates">This is the default location for template partials and helpers</a>. These helpers are used amongst the separate Kubernetes resource templates.</p><p>Guidance around helpers include:</p><ul><li>Defining a documentation block for each function (<a href="https://docs.helm.sh/chart_template_guide/#declaring-and-using-templates-with-define-and-template">source</a>).</li><li>Prefixing each function with the name of the chart (<a href="https://docs.helm.sh/chart_template_guide/#declaring-and-using-templates-with-define-and-template">source</a>).</li></ul><iframe src="" width="0" height="0" frameborder="0" scrolling="no"><a href="https://medium.com/media/dca263d922abae7a4623caef20dd362a/href">https://medium.com/media/dca263d922abae7a4623caef20dd362a/href</a></iframe><p><strong>Secret</strong></p><p>Here’s the first example of using those helper functions and values together to define a <a href="https://kubernetes.io/docs/concepts/configuration/secret/">Secret</a>.</p><iframe src="" width="0" height="0" frameborder="0" scrolling="no"><a href="https://medium.com/media/1c8efd14aed829dff0e9e18b11127864/href">https://medium.com/media/1c8efd14aed829dff0e9e18b11127864/href</a></iframe><p><strong>Deployment</strong></p><p>Next up is the <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deploymen</a>t which depends on the previously defined secret; this is why I reference it in annotations section.</p><p>The reason I am doing is so that whenever any secret values change, Kubernetes will redeploy picking up any new values (More information about this can be found <a href="https://docs.helm.sh/developing_charts/#automatically-roll-deployments-when-configmaps-or-secrets-change">here</a>).</p><iframe src="" width="0" height="0" frameborder="0" scrolling="no"><a href="https://medium.com/media/e4ffe12d74fb52ab8e95cbd5074875f2/href">https://medium.com/media/e4ffe12d74fb52ab8e95cbd5074875f2/href</a></iframe><p><strong>Service</strong></p><p>Now that I had a Deployment I needed to expose it within the cluster, hence the <a href="https://kubernetes.io/docs/concepts/services-networking/service/">Service</a> definition.</p><iframe src="" width="0" height="0" frameborder="0" scrolling="no"><a href="https://medium.com/media/a5c7853dda0fda148a68ad6cb5b47dd2/href">https://medium.com/media/a5c7853dda0fda148a68ad6cb5b47dd2/href</a></iframe><p><strong>Ingress</strong></p><p>Finally the last piece is an <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingres</a>s resource. The Service currently is only available within the cluster and not available externally.</p><p>This is because since the bot is based on <a href="https://expressjs.com">expressjs</a> it is <a href="https://expressjs.com/en/advanced/best-practice-performance.html">recommended to use a proxy like NGINX</a> to make it internet facing. This is exactly the job of this Ingress definition.</p><iframe src="" width="0" height="0" frameborder="0" scrolling="no"><a href="https://medium.com/media/bbeb459f492a4e3345e8ad06b1219375/href">https://medium.com/media/bbeb459f492a4e3345e8ad06b1219375/href</a></iframe><h4>Specifying dependencies</h4><p>As I mentioned in the defining the templates section, the chat bot is exposed to the world through <a href="https://www.nginx.com/">NGINX</a>. Additionally the bot uses <a href="https://redis.io/">Redis</a> for caching theme park data.</p><p>Rather than creating the Kubernetes templates to deploy NGINX and Redis myself, Helm allows you to define other charts as <a href="https://docs.helm.sh/developing_charts/#chart-dependencies">dependencies</a> which get deployed alongside your chart.</p><p>Luckily for me there happened to be charts already for NGINX and Redis. These were included as part of this chart by creating a requirements.yaml file.</p><iframe src="" width="0" height="0" frameborder="0" scrolling="no"><a href="https://medium.com/media/f8e85931b78b78280777cec322261b0a/href">https://medium.com/media/f8e85931b78b78280777cec322261b0a/href</a></iframe><h4>Chart.yaml</h4><p>The final piece of puzzle is the actual chart definition:</p><iframe src="" width="0" height="0" frameborder="0" scrolling="no"><a href="https://medium.com/media/aa8f268fcc8ce9720f6fd3eb82780b3c/href">https://medium.com/media/aa8f268fcc8ce9720f6fd3eb82780b3c/href</a></iframe><h3>Build and deployment</h3><p>After creating the Helm chart, I put everything together using Travis CI to build and deploy the bot to Kubernetes.</p><p>My .travis.yml file looks like the following:</p><iframe src="" width="0" height="0" frameborder="0" scrolling="no"><a href="https://medium.com/media/10535e073c8b4b8a17313a5ad801d9c9/href">https://medium.com/media/10535e073c8b4b8a17313a5ad801d9c9/href</a></iframe><p>This Travis CI definition utilizes <a href="https://docs.travis-ci.com/user/build-stages/">Build Stages</a> (currently in Beta) which allow you to cleanly separate the various phases of a build/deploy pipeline. You will also notice that I am using a number of environment variables which are set using the <a href="https://docs.travis-ci.com/user/environment-variables#Defining-Variables-in-Repository-Settings">Repository settings</a>.</p><p>This definition performs the following actions:</p><ul><li>Before any stage, it installs <a href="https://docs.travis-ci.com/user/installing-dependencies/">dependencies</a> that the scripts require to work i.e. Azure CLI, kubectl and helm.</li><li>The build stage performs the following tasks:</li></ul><ol><li>Installs dependencies using yarn.</li><li>Builds the bot using yarn.</li><li>Lints the helm chart definition.</li><li>If the build is working off master and it is successful, then it builds a docker image and publishes it to Docker Hub.</li></ol><ul><li>If the build phase passes and the build is working off the master branch, then it runs the deploy stage. This stage uses the experimental <a href="https://docs.travis-ci.com/user/deployment/script/">Script deployment</a> to run a wrapper script to deploy the chart to Kubernetes.</li></ul><p>The wrapper script looks as follows:</p><iframe src="" width="0" height="0" frameborder="0" scrolling="no"><a href="https://medium.com/media/eeba071fe62a1e0ff671eb8d11859b9a/href">https://medium.com/media/eeba071fe62a1e0ff671eb8d11859b9a/href</a></iframe><p>With all that in place, the theme park chat bot is deployed to Kubernetes and ready for users to chat to.</p><p>I hope this two part post has helped anyone else looking to get started with Kubernetes/Helm and setting up a deployment pipeline.</p><img src="https://medium.com/_/stat?event=post.clientViewed&referrerSource=full_rss&postId=61b176c2bc26" width="1" height="1" alt=""><hr><p><a href="https://itnext.io/building-a-kubernetes-deployment-pipeline-for-microsoft-bot-framework-part-2-61b176c2bc26">Building a Kubernetes deployment pipeline for Microsoft Bot Framework – Part 2</a> was originally published in <a href="https://itnext.io">ITNEXT</a> on Medium, where people are continuing the conversation by highlighting and responding to this story.</p>
+<figure>
+  <img
+    alt=""
+    src="https://cdn-images-1.medium.com/max/1024/1*TP76AT0J2Y8mwuZc5_LDlA.jpeg"
+  />
+</figure>
+<p>
+  This is the second post in this series discussing how I set up an end to end
+  Kubernetes deployment pipeline for a chat bot. If you missed part 1, you can
+  check it out <a
+    href="https://itnext.io/building-a-kubernetes-deployment-pipeline-for-microsoft-bot-framework-part-1-ddbb9f6f1796"
+    >here</a
+  >.
+</p>
+<p>
+  Part 2 details the deployment of the theme park chat bot. All the code
+  presented is available on my GitHub at:
+  <a href="https://github.com/JonJam/themeparks-bot">themeparks-bot</a>.
+</p>
+<h3>Tools</h3>
+<p>
+  In my previous post, I introduced the tools I used to create the
+  infrastructure; for the bot I reused the majority of the tools with a few
+  additions:
+</p>
+<h4>Docker Hub</h4>
+<p>
+  <a href="https://hub.docker.com/">Docker Hub</a> is a cloud container image
+  registry. This is used to store the docker images built from every Travis CI
+  build which are then used in Kubernetes.
+</p>
+<p>
+  I chose Docker Hub as it is free for public images and integrates out of the
+  box with Kubernetes.
+</p>
+<h4>Docker CLI</h4>
+<p>
+  <a href="https://docs.docker.com/engine/reference/commandline/cli/"
+    >Docker CLI</a
+  >
+  is the command-line tool for managing docker containers and images. I used
+  this to build the chat bot docker image and push it to Docker Hub.
+</p>
+<h3>Creating the Helm chart</h3>
+<p>
+  In order to use <a href="https://helm.sh/">Helm</a> for deployment I had to
+  create a <a href="https://docs.helm.sh/developing_charts/#charts">Chart</a>,
+  this section details how I got started and shows the individual components
+  that make up the chart.
+</p>
+<h4>Getting started</h4>
+<p>
+  The Helm CLI provides a
+  <a href="https://docs.helm.sh/helm/#helm-create">create</a> command to
+  generate a skeleton chart with the required directory structure and files.
+  This was run as follows:
+</p>
+<pre>helm create themeparks-bot</pre>
+<p>The output of this command is this folder structure:</p>
+<pre>themeparks-bot/<br>  |<br>  |- .helmignore   # Contains patterns to ignore when packaging Helm charts.<br>  |<br>  |- Chart.yaml    # Information about your chart<br>  |<br>  |- values.yaml   # The default values for your templates<br>  |<br>  |- charts/       # Charts that this chart depends on<br>  |<br>  |- templates/    # The template files</pre>
+<p>
+  The main working area is the templates folder as this is where Kubernetes
+  resources reside. In fact, the skeleton chart actually comes with example
+  <a
+    href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"
+    >Deployment</a
+  >,
+  <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/"
+    >Ingress</a
+  >
+  and
+  <a href="https://kubernetes.io/docs/concepts/services-networking/service/"
+    >Service</a
+  >
+  templates.
+</p>
+<h4>Creating the Values file</h4>
+<p>
+  Before I created the templates, I first of all modified the
+  <a href="https://docs.helm.sh/chart_template_guide/#values-files"
+    >values.yaml</a
+  >
+  file. This contains the defaults for properties used in the templates.
+</p>
+<iframe src="" width="0" height="0" frameborder="0" scrolling="no"
+  ><a href="https://medium.com/media/34c1e932be0ccce5e34c28fd3f7eacfc/href"
+    >https://medium.com/media/34c1e932be0ccce5e34c28fd3f7eacfc/href</a
+  ></iframe
+>
+<p>
+  There a number of best practices for Values files that I followed when making
+  modifications (see the
+  <a href="https://docs.helm.sh/chart_best_practices/#values">documentation</a
+  >). A number of key ones are:
+</p>
+<ul>
+  <li>Variables names should use camelcase.</li>
+  <li>A flat structure should be preferred, over nesting.</li>
+  <li>All properties should be documented.</li>
+</ul>
+<p>
+  One thing to note it that I haven’t specified values for those under the
+  secret property; this is because I pass this at deployment time, since they
+  are values I don’t want in source control.
+</p>
+<h4>Defining the templates</h4>
+<p>
+  Using the skeleton templates as a starting point, I modified and created
+  additional templates for the chat bot.
+</p>
+<p>Helm has a lot of general guidance around developing templates such as:</p>
+<ul>
+  <li>
+    Templates files should follow a naming convention of [Chart
+    name]-[Kubernetes resource type].yaml e.g. themeparks-bot-deployment.yaml.
+  </li>
+  <li>
+    A template file should only contain a single Kubernetes resource (<a
+      href="https://docs.helm.sh/chart_best_practices/#structure-of-templates"
+      >source</a
+    >).
+  </li>
+  <li>
+    All resources should have the standard set of Helm labels (<a
+      href="https://docs.helm.sh/chart_best_practices/#standard-labels"
+      >source</a
+    >).
+  </li>
+  <li>
+    The include function should be used over the template function (<a
+      href="https://docs.helm.sh/chart_template_guide/#the-include-function"
+      >source</a
+    >).
+  </li>
+</ul>
+<p>With these in mind here are the individual templates.</p>
+<p><strong>_helpers</strong></p>
+<p>
+  <a href="https://docs.helm.sh/chart_template_guide/#named-templates"
+    >This is the default location for template partials and helpers</a
+  >. These helpers are used amongst the separate Kubernetes resource templates.
+</p>
+<p>Guidance around helpers include:</p>
+<ul>
+  <li>
+    Defining a documentation block for each function (<a
+      href="https://docs.helm.sh/chart_template_guide/#declaring-and-using-templates-with-define-and-template"
+      >source</a
+    >).
+  </li>
+  <li>
+    Prefixing each function with the name of the chart (<a
+      href="https://docs.helm.sh/chart_template_guide/#declaring-and-using-templates-with-define-and-template"
+      >source</a
+    >).
+  </li>
+</ul>
+<iframe src="" width="0" height="0" frameborder="0" scrolling="no"
+  ><a href="https://medium.com/media/dca263d922abae7a4623caef20dd362a/href"
+    >https://medium.com/media/dca263d922abae7a4623caef20dd362a/href</a
+  ></iframe
+>
+<p><strong>Secret</strong></p>
+<p>
+  Here’s the first example of using those helper functions and values together
+  to define a <a
+    href="https://kubernetes.io/docs/concepts/configuration/secret/"
+    >Secret</a
+  >.
+</p>
+<iframe src="" width="0" height="0" frameborder="0" scrolling="no"
+  ><a href="https://medium.com/media/1c8efd14aed829dff0e9e18b11127864/href"
+    >https://medium.com/media/1c8efd14aed829dff0e9e18b11127864/href</a
+  ></iframe
+>
+<p><strong>Deployment</strong></p>
+<p>
+  Next up is the
+  <a
+    href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"
+    >Deploymen</a
+  >t which depends on the previously defined secret; this is why I reference it
+  in annotations section.
+</p>
+<p>
+  The reason I am doing is so that whenever any secret values change, Kubernetes
+  will redeploy picking up any new values (More information about this can be
+  found <a
+    href="https://docs.helm.sh/developing_charts/#automatically-roll-deployments-when-configmaps-or-secrets-change"
+    >here</a
+  >).
+</p>
+<iframe src="" width="0" height="0" frameborder="0" scrolling="no"
+  ><a href="https://medium.com/media/e4ffe12d74fb52ab8e95cbd5074875f2/href"
+    >https://medium.com/media/e4ffe12d74fb52ab8e95cbd5074875f2/href</a
+  ></iframe
+>
+<p><strong>Service</strong></p>
+<p>
+  Now that I had a Deployment I needed to expose it within the cluster, hence
+  the
+  <a href="https://kubernetes.io/docs/concepts/services-networking/service/"
+    >Service</a
+  >
+  definition.
+</p>
+<iframe src="" width="0" height="0" frameborder="0" scrolling="no"
+  ><a href="https://medium.com/media/a5c7853dda0fda148a68ad6cb5b47dd2/href"
+    >https://medium.com/media/a5c7853dda0fda148a68ad6cb5b47dd2/href</a
+  ></iframe
+>
+<p><strong>Ingress</strong></p>
+<p>
+  Finally the last piece is an
+  <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/"
+    >Ingres</a
+  >s resource. The Service currently is only available within the cluster and
+  not available externally.
+</p>
+<p>
+  This is because since the bot is based on
+  <a href="https://expressjs.com">expressjs</a> it is
+  <a href="https://expressjs.com/en/advanced/best-practice-performance.html"
+    >recommended to use a proxy like NGINX</a
+  >
+  to make it internet facing. This is exactly the job of this Ingress
+  definition.
+</p>
+<iframe src="" width="0" height="0" frameborder="0" scrolling="no"
+  ><a href="https://medium.com/media/bbeb459f492a4e3345e8ad06b1219375/href"
+    >https://medium.com/media/bbeb459f492a4e3345e8ad06b1219375/href</a
+  ></iframe
+>
+<h4>Specifying dependencies</h4>
+<p>
+  As I mentioned in the defining the templates section, the chat bot is exposed
+  to the world through <a href="https://www.nginx.com/">NGINX</a>. Additionally
+  the bot uses <a href="https://redis.io/">Redis</a> for caching theme
+  park data.
+</p>
+<p>
+  Rather than creating the Kubernetes templates to deploy NGINX and Redis
+  myself, Helm allows you to define other charts as
+  <a href="https://docs.helm.sh/developing_charts/#chart-dependencies"
+    >dependencies</a
+  >
+  which get deployed alongside your chart.
+</p>
+<p>
+  Luckily for me there happened to be charts already for NGINX and Redis. These
+  were included as part of this chart by creating a requirements.yaml file.
+</p>
+<iframe src="" width="0" height="0" frameborder="0" scrolling="no"
+  ><a href="https://medium.com/media/f8e85931b78b78280777cec322261b0a/href"
+    >https://medium.com/media/f8e85931b78b78280777cec322261b0a/href</a
+  ></iframe
+>
+<h4>Chart.yaml</h4>
+<p>The final piece of puzzle is the actual chart definition:</p>
+<iframe src="" width="0" height="0" frameborder="0" scrolling="no"
+  ><a href="https://medium.com/media/aa8f268fcc8ce9720f6fd3eb82780b3c/href"
+    >https://medium.com/media/aa8f268fcc8ce9720f6fd3eb82780b3c/href</a
+  ></iframe
+>
+<h3>Build and deployment</h3>
+<p>
+  After creating the Helm chart, I put everything together using Travis CI to
+  build and deploy the bot to Kubernetes.
+</p>
+<p>My .travis.yml file looks like the following:</p>
+<iframe src="" width="0" height="0" frameborder="0" scrolling="no"
+  ><a href="https://medium.com/media/10535e073c8b4b8a17313a5ad801d9c9/href"
+    >https://medium.com/media/10535e073c8b4b8a17313a5ad801d9c9/href</a
+  ></iframe
+>
+<p>
+  This Travis CI definition utilizes
+  <a href="https://docs.travis-ci.com/user/build-stages/">Build Stages</a>
+  (currently in Beta) which allow you to cleanly separate the various phases of
+  a build/deploy pipeline. You will also notice that I am using a number of
+  environment variables which are set using the
+  <a
+    href="https://docs.travis-ci.com/user/environment-variables#Defining-Variables-in-Repository-Settings"
+    >Repository settings</a
+  >.
+</p>
+<p>This definition performs the following actions:</p>
+<ul>
+  <li>
+    Before any stage, it installs
+    <a href="https://docs.travis-ci.com/user/installing-dependencies/"
+      >dependencies</a
+    >
+    that the scripts require to work i.e. Azure CLI, kubectl and helm.
+  </li>
+  <li>The build stage performs the following tasks:</li>
+</ul>
+<ol>
+  <li>Installs dependencies using yarn.</li>
+  <li>Builds the bot using yarn.</li>
+  <li>Lints the helm chart definition.</li>
+  <li>
+    If the build is working off master and it is successful, then it builds a
+    docker image and publishes it to Docker Hub.
+  </li>
+</ol>
+<ul>
+  <li>
+    If the build phase passes and the build is working off the master branch,
+    then it runs the deploy stage. This stage uses the experimental
+    <a href="https://docs.travis-ci.com/user/deployment/script/"
+      >Script deployment</a
+    >
+    to run a wrapper script to deploy the chart to Kubernetes.
+  </li>
+</ul>
+<p>The wrapper script looks as follows:</p>
+<iframe src="" width="0" height="0" frameborder="0" scrolling="no"
+  ><a href="https://medium.com/media/eeba071fe62a1e0ff671eb8d11859b9a/href"
+    >https://medium.com/media/eeba071fe62a1e0ff671eb8d11859b9a/href</a
+  ></iframe
+>
+<p>
+  With all that in place, the theme park chat bot is deployed to Kubernetes and
+  ready for users to chat to.
+</p>
+<p>
+  I hope this two part post has helped anyone else looking to get started with
+  Kubernetes/Helm and setting up a deployment pipeline.
+</p>
+<img
+  src="https://medium.com/_/stat?event=post.clientViewed&referrerSource=full_rss&postId=61b176c2bc26"
+  width="1"
+  height="1"
+  alt=""
+/>
+<hr />
+<p>
+  <a
+    href="https://itnext.io/building-a-kubernetes-deployment-pipeline-for-microsoft-bot-framework-part-2-61b176c2bc26"
+    >Building a Kubernetes deployment pipeline for Microsoft Bot Framework –
+    Part 2</a
+  >
+  was originally published in <a href="https://itnext.io">ITNEXT</a> on Medium,
+  where people are continuing the conversation by highlighting and responding to
+  this story.
+</p>
