@@ -9,7 +9,7 @@ tag:
 excerpt: "A practical look at building a weather MCP server with Spring AI and using Cursor to support the development workflow."
 ---
 
-![Agentic development in practice: Building a weather MCP server with Spring AI and Cursor](/assets/images/2026-03-31-weather-mcp-1idj-gzsitzbinekyfscgag12.png)
+![Agentic development in practice: Building a weather MCP server with Spring AI and Cursor]({{ '/assets/images/2026-03-31-weather-mcp-1idj-gzsitzbinekyfscgag12.png' | relative_url }})
 
 ## Introduction
 
@@ -29,7 +29,7 @@ I built an [Accuweather](https://www.accuweather.com/)-powered MCP server that e
 - Hourly forecasts
 - Daily forecasts
 
-![A screenshot of the weather forecast for Sheffield, United Kingdom within Claude](/assets/images/2026-03-31-weather-mcp-1idj-7g31dhj768s2bqxcxk22.png)
+![A screenshot of the weather forecast for Sheffield, United Kingdom within Claude]({{ '/assets/images/2026-03-31-weather-mcp-1idj-7g31dhj768s2bqxcxk22.png' | relative_url }})
 
 The server is published on the [official MCP Registry](https://registry.modelcontextprotocol.io/?q=io.github.JonJam%2Faccuweather-mcp) and can be integrated into tools like Claude.
 
@@ -94,7 +94,7 @@ To improve this, I made a few changes:
 
 By the time I implemented the hourly forecast feature, I was able to generate a [plan](https://github.com/JonJam/accuweather-mcp/blob/main/.cursor/plans/hourly_forecast_feature_4e364946.plan.md) and delegate execution to a Cloud Agent—only needing to review the result.
 
-![A screenshot of the output produced by a Cursor Cloud Agent when building the hourly forecast feature](/assets/images/2026-03-31-weather-mcp-1idj-jr7w9oh6i3odvfx1zouh.png)
+![A screenshot of the output produced by a Cursor Cloud Agent when building the hourly forecast feature]({{ '/assets/images/2026-03-31-weather-mcp-1idj-jr7w9oh6i3odvfx1zouh.png' | relative_url }})
 
 ### Spring AI
 

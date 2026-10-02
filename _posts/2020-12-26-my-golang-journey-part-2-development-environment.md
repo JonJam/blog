@@ -9,7 +9,8 @@ tag:
 excerpt: "How I set up a Go development environment with Visual Studio Code, debugging, formatting, language support and golangci-lint."
 ---
 
-![Part 2: Development environment](/assets/images/2020-12-26-my-golang-journey-part-2-development-environment-2edg-ic5s5vy52czom5643e5w.png)
+![Part 2: Development environment](
+{{ '/assets/images/2020-12-26-my-golang-journey-part-2-development-environment-2edg-ic5s5vy52czom5643e5w.png' | relative_url }})
 
 > The cover image is from [MariaLetta/free-gophers-pack](https://github.com/MariaLetta/free-gophers-pack)
 

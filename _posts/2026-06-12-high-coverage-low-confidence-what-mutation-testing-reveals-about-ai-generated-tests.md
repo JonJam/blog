@@ -9,7 +9,7 @@ tag:
 excerpt: "Why high test coverage does not necessarily mean strong tests, and how mutation testing can reveal weaknesses in AI-generated test suites."
 ---
 
-![High Coverage, Low Confidence: What Mutation Testing Reveals About AI-Generated Tests](/assets/images/2026-06-12-high-coverage-low-confidence-what-mutation-testing-reveals-about-ai-generated-tests-3bg4-ig4yplum6p05myce37g9.png)
+![High Coverage, Low Confidence: What Mutation Testing Reveals About AI-Generated Tests]({{ '/assets/images/2026-06-12-high-coverage-low-confidence-what-mutation-testing-reveals-about-ai-generated-tests-3bg4-ig4yplum6p05myce37g9.png' | relative_url }})
 
 AI coding agents can now generate code and tests in seconds.
 
@@ -47,7 +47,7 @@ In short:
 
 > Mutation testing tells you whether your tests are actually doing their job.
 
-![Meme depicting mutation testing](/assets/images/2026-06-12-high-coverage-low-confidence-what-mutation-testing-reveals-about-ai-generated-tests-3bg4-a4qu8ttakmnhtkfj77sd.png)
+![Meme depicting mutation testing]({{ '/assets/images/2026-06-12-high-coverage-low-confidence-what-mutation-testing-reveals-about-ai-generated-tests-3bg4-a4qu8ttakmnhtkfj77sd.png' | relative_url }})
 
 ## Why this matters in the AI agent era
 
@@ -125,9 +125,10 @@ That’s the key insight:
 
 High coverage ≠ strong tests
 
-![Mutation testing report depicting a java project](/assets/images/2026-06-12-high-coverage-low-confidence-what-mutation-testing-reveals-about-ai-generated-tests-3bg4-8sl2mqm9gf7nq4woo9ir.png)
+![Mutation testing report depicting a java project]({{ '/assets/images/2026-06-12-high-coverage-low-confidence-what-mutation-testing-reveals-about-ai-generated-tests-3bg4-8sl2mqm9gf7nq4woo9ir.png' | relative_url }})
 
-![Mutating testing report for a single Java class showing surviving mutants](/assets/images/2026-06-12-high-coverage-low-confidence-what-mutation-testing-reveals-about-ai-generated-tests-3bg4-49wdkwig1i08cl8ny201.png)
+![Mutating testing report for a single Java class showing surviving mutants](
+{{ '/assets/images/2026-06-12-high-coverage-low-confidence-what-mutation-testing-reveals-about-ai-generated-tests-3bg4-49wdkwig1i08cl8ny201.png' | relative_url }})
 
 ## A simple example: surviving mutants
 

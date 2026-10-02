@@ -9,7 +9,8 @@ tag:
 excerpt: "The final part of my Go stock-checker journey, covering the DigitalOcean App Platform Hackathon submission and deployment."
 ---
 
-![Part 4: DigitalOcean App Platform Hackathon Submission](/assets/images/2020-12-26-part-4-digitalocean-app-platform-hackathon-submission-2-445-02tppn0au5sgjupvk0wp.png)
+![Part 4: DigitalOcean App Platform Hackathon Submission](
+{{ '/assets/images/2020-12-26-part-4-digitalocean-app-platform-hackathon-submission-2-445-02tppn0au5sgjupvk0wp.png' | relative_url }})
 
 This post is part of a series detailing my journey with [`golang`](https://golang.org/) from learning the language to entering the [DigitalOcean App Platform Hackathon](https://dev.to/devteam/announcing-the-digitalocean-app-platform-hackathon-on-dev-2i1k).
 
@@ -29,7 +30,7 @@ N/A
 
 ### Screenshots
 
-![Alt Text](/assets/images/2020-12-26-part-4-digitalocean-app-platform-hackathon-submission-2-445-zexeolf7l0hksklih0gm.png)
+![Alt Text]({{ '/assets/images/2020-12-26-part-4-digitalocean-app-platform-hackathon-submission-2-445-zexeolf7l0hksklih0gm.png' | relative_url }})
 
 ### Description
 

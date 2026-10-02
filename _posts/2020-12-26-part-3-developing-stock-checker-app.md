@@ -9,7 +9,7 @@ tag:
 excerpt: "How I built the stock-checker app in Go, including the packages, Docker setup and Twilio SMS integration used to monitor Xbox Series X stock."
 ---
 
-![Part 3: Developing stock-checker app](/assets/images/2020-12-26-part-3-developing-stock-checker-app-4bnc-5ih9vfz7aw1afriviq0w.png)
+![Part 3: Developing stock-checker app]({{ '/assets/images/2020-12-26-part-3-developing-stock-checker-app-4bnc-5ih9vfz7aw1afriviq0w.png' | relative_url }})
 
 This post is part of a series detailing my journey with [`golang`](https://golang.org/) from learning the language to entering the [DigitalOcean App Platform Hackathon](https://dev.to/devteam/announcing-the-digitalocean-app-platform-hackathon-on-dev-2i1k).
 
