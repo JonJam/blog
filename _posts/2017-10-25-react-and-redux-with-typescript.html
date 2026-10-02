@@ -1,0 +1,47 @@
+---
+layout: post
+title: React and Redux with TypeScript
+tag:
+  - react
+  - redux
+  - typescript
+excerpt: "After building a password manager app to learn React and Redux, here are examples of each major part, typed properly in TypeScript without resorting to any."
+---
+
+<figure><img src="https://cdn-images-1.medium.com/max/2560/1*CHH1P0NwJfZzXXHo-VUzOA.png"/></figure>
+<p>This week I finally finished a side project I have been working on over the past few months to learn React and Redux in TypeScript; it is a Password Manager type app which if you want to check out you can find over on <a href="https://github.com/JonJam/yorpw_ui_web">GitHub</a>.</p>
+<p>Whilst building the app I did come across a few head scratching moments at times trying to make React or Redux play nicely with TypeScript’s type system without simply resorting to using the <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html">any</a> type. Sometimes I did find the rare example on StackOverflow or blog posts to help, but the majority of times I was on my own.</p>
+<p>Given my experience in working with React/Redux in TypeScript, I thought I would share examples of the major parts of these libraries all in one place to help the next person who runs into any of issues I had.</p>
+<p>I created a sample app which pulls all this code together over on <a href="https://github.com/JonJam/react-redux-ts">GitHub</a> and with that I’ll shut up and present the code…</p>
+<h3>React</h3>
+<h4>Class component</h4>
+<p>These are React components defined using an ES6 class, typically they are used when you want a component to have state or use life cycle functions such as componentDidMount; I usually use them to define pages.</p>
+<p>For more information about Class components in React, see the <a href="https://reactjs.org/docs/components-and-props.html#functional-and-class-components">documentation</a>.</p>
+<figure><script src="https://gist.github.com/JonJam/8e16f7d94323b8517d3f451bfad923da.js"></script><figcaption>React — Class component</figcaption></figure>
+<h4>Functional component</h4>
+<p>These are the simpler React components defined using a function, they just have access to the properties passed in. I use them to create presentational components i.e. those that define a UI element such as a navigation bar.</p>
+<p>For more information about Functional components in React, see the <a href="https://reactjs.org/docs/components-and-props.html#functional-and-class-components">documentation</a>.</p>
+<figure><script src="https://gist.github.com/JonJam/c2578c530340f6b59dcedcef525d9234.js"></script><figcaption>React — Functional component</figcaption></figure>
+<h3>Redux</h3>
+<h4>Actions</h4>
+<p>Actions are the messages that are sent around an application to change state.</p>
+<p>For more information about the Actions, see <a href="http://redux.js.org/docs/basics/Actions.html">this section</a> of the Redux documentation.</p>
+<p><strong>Action Types</strong></p>
+<p>All Actions must have a type defined as string constants, which in TypeScript you can use <a href="https://www.typescriptlang.org/docs/handbook/enums.html">String enums</a> as shown in the actionTypeKeys.ts file.</p>
+<p>The index.ts file on the other hand defines the shape of the Sign In Actions using Interfaces. These Interfaces can be combined with others defined in different modules to define an ActionTypes type which describes all possible Actions in the application.</p>
+<figure><script src="https://gist.github.com/JonJam/d4e29d0bee082199728c183ea4bb332a.js"></script><figcaption>Redux — Action types</figcaption></figure>
+<p><strong>Action Creators</strong></p>
+<p>Action Creators are functions that return an Action, but they can also dispatch other Actions. In the example below, the other Actions dispatched signal the state of the invocation i.e whether something is in progress, succeeded or failed.</p>
+<figure><script src="https://gist.github.com/JonJam/914f2567675c00960dafdb5fc2ea2524.js"></script><figcaption>Redux — Action creators</figcaption></figure>
+<h4>Reducers</h4>
+<p>Reducers process Actions created in an application and in turn change the state in the Store, according to the type and payload.</p>
+<p>For more information about the Reducers, see <a href="http://redux.js.org/docs/basics/Reducers.html">this section</a> of the Redux documentation.</p>
+<figure><script src="https://gist.github.com/JonJam/63ad0347ba81eb93aabd380f380a6227.js"></script><figcaption>Redux — Reducers</figcaption></figure>
+<h4>Store</h4>
+<p>The Store is the centre point of Redux and combines the Actions and Reducers together; it is where the application state is held.</p>
+<p>For more information about the Store, see <a href="http://redux.js.org/docs/basics/Store.html">this section </a>of the Redux documentation.</p>
+<figure><script src="https://gist.github.com/JonJam/bd3748ba8892512d369838cc7894b38f.js"></script><figcaption>Redux — Store</figcaption></figure>
+<h3>All together now…</h3>
+<p>When you put all these pieces together and want to use state or dispatch actions within a React component, it is called a Container component.</p>
+<p>For more information about using React and Redux together, see <a href="http://redux.js.org/docs/basics/UsageWithReact.html">this section</a> of the Redux documentation.</p>
+<figure><script src="https://gist.github.com/JonJam/0fc21f1c01cdaf5da8ce7d544ef48562.js"></script><figcaption>React and Redux — Container component</figcaption></figure>

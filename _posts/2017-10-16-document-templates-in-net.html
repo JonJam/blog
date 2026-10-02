@@ -1,0 +1,30 @@
+---
+layout: post
+title: Document templates in .NET
+tag:
+  - dotnet
+  - csharp
+  - templating
+  - dotliquid
+excerpt: "Why I chose DotLiquid over RazorEngine and RazorLight for generating PDFs and emails from templates in .NET, and the three steps needed to render one."
+---
+
+<p>Recently I have been working on a project where we needed a Template Engine such that we could easily generate PDFs and emails from templates.</p>
+<p>After doing some research on options in the .NET universe, I found these libraries:</p>
+<ul><li><a href="https://github.com/Antaris/RazorEngine">RazorEngine</a></li><li><a href="https://github.com/Antaris/RazorEngine">RazorLight</a></li><li><a href="https://github.com/dotliquid/dotliquid">DotLiquid</a></li></ul>
+<p>After looking into each of them, I went with DotLiquid. the reasons were that <a href="https://github.com/Shopify/liquid/wiki#who-uses-liquid">Liquid</a> was created by Shopify for the exact requirements we had and also, it is used by a large number of companies including some big names such as GoDaddy, Rackspace and Zendesk. Furthermore, RazorEngine seems to generate temporary files according to the <a href="https://github.com/Antaris/RazorEngine">documentation</a> and I didn’t like the idea of having to perform clean up; whilst RazorLight does look promising but a bit too early to use yet, maybe worth revisiting when 2.0 is released.</p>
+<p>DotLiquid is simply a .NET port of the Ruby liquid engine, to demonstrate its simplicity I created <a href="https://github.com/JonJam/templates_dotliquid">an example project</a> on my GitHub.</p>
+<h3>Create a template</h3>
+<p>First of all, create an instance of the Template class by parsing a Liquid string with:</p>
+<pre>Template template = Template.Parse(liquidTemplateString);</pre>
+<p>The Template instance could be cached to save re-parsing the template every time it is used.</p>
+<h3>Create a hash</h3>
+<p>Next is to create a hash of your model object; your Model object could be an anoymous object, a class inheriting from Drop or a <a href="https://en.wikipedia.org/wiki/Plain_old_CLR_object">POCO</a> (See the <a href="https://github.com/dotliquid/dotliquid/wiki">DotLiquid documentation</a> for more details). This is done with:</p>
+<pre>Hash hash = Hash.FromAnonymousObject(new { Model = data });</pre>
+<h3>Combine the hash and the template</h3>
+<p>Finally, call the Render method on the Template instance created earlier passing the hash:</p>
+<pre>string renderedOutput = template.Render(hash);</pre>
+<p>That’s it! Your template will be rendered with the data you passed in.</p>
+<p><a href="https://github.com/JonJam/templates_dotliquid">My example GitHub project</a> contains a Console App combining all this and also, shows some of the DotLiquid’s configuration options such as date formats and naming conventions.</p>
+<p>By the way if you use Visual Studio Code, there are two useful Liquid extensions:</p>
+<ul><li><a href="https://marketplace.visualstudio.com/items?itemName=neilding.language-liquid">Liquid Languages Support</a></li><li><a href="https://marketplace.visualstudio.com/items?itemName=killalau.vscode-liquid-snippets">Shopify Liquid Template Snippets</a></li></ul>

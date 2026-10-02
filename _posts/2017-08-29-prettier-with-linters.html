@@ -1,0 +1,20 @@
+---
+layout: post
+title: Prettier with linters
+tag:
+  - prettier
+  - linting
+  - typescript
+  - css
+excerpt: "Prettier and your linter will fight over formatting unless they are configured to cooperate, so here is my minimal setup for using prettier with tslint and stylelint."
+---
+
+<p>Recently I started using <a href="https://github.com/prettier/prettier">prettier</a> in my side projects and for those who don’t know what prettier is; it is an opinionated code formatter. I highly encourage you to check it out.</p>
+<p>prettier’s documentation is a great place to get started, but when trying to set it up for a “real project” I couldn’t find any complete examples with linters. If not correctly configured, your linter of choice and prettier will be at war about formatting your code.</p>
+<p>In my case I was using:</p>
+<ul><li><a href="https://www.typescriptlang.org/">TypeScript </a>with <a href="https://palantir.github.io/tslint/">tslint</a></li><li>CSS with <a href="https://stylelint.io/">stylelint</a></li></ul>
+<p>After some digging and playing around, I got the previously mentioned linters playing nice with prettier.</p>
+<p>To save the next person who tries to do this a few hours, I thought I would share my minimal setup on <a href="https://github.com/JonJam/prettier_with">GitHub</a>. Simply:</p>
+<ul><li>Clone the project.</li><li>Open up one of the folders e.g. tslint.</li><li>Install the dependencies with npm or yarn.</li><li>Run the linter command with “npm run lint-ts” or “yarn run lint-ts” (Replace lint-ts with lint-css for stylelint).</li></ul>
+<p>If everything worked as expected, you should have some linting errors.</p>
+<p>There you go. Happy coding :)</p>

@@ -1,0 +1,20 @@
+---
+layout: post
+title: VSTS hosted macOS agents not available outside USA
+tag:
+  - vsts
+  - xamarin
+  - ios
+  - ci-cd
+  - microsoft
+excerpt: "Microsoft's preview hosted macOS agents for VSTS look ideal for Xamarin iOS builds, but a two factor authentication limitation means they don't work for Apple accounts outside the USA."
+---
+
+<p>In November 2017, Microsoft <a href="https://blogs.msdn.microsoft.com/devops/2017/11/16/cloud-hosted-mac-agents-for-ci-cd-pipelines/">announced a preview of cloud-hosted CI/CD macOS agents</a> for V<a href="https://www.visualstudio.com/team-services/">isual Studio Team Services</a> (VSTS). This is great for <a href="https://www.xamarin.com/">Xamarin</a> iOS development as it means you don’t have to have a Mac hooked up to VSTS.</p>
+<p>As soon as I saw this announcement, I tried to get this up and running for my team to save us time having to maintain our Mac Mini.</p>
+<p>The first hurdle was this <a href="https://developercommunity.visualstudio.com/content/problem/152352/vsts-hosted-mac-agent-fails-with.html">issue</a> causing the iOS build to fail; a week and half later, the shell command posted got our build step succeeding. Hopefully in the future, you won’t have to run this command to manually set the Xamarin SDK tools version.</p>
+<p>Now before I continue I should say that we have Two Factor Authentication (2FA) on the Apple account we used to publish our apps to the App Store.</p>
+<p>The reason I mention this was that the next hurdle was when trying to push a new build to TestFlight. The build agent would prompt for a 2FA code (despite being configured per <a href="https://docs.fastlane.tools/best-practices/continuous-integration/">fastlane’s documentation for CI/CD pipelines</a> not to) coming from Atlanta, GA and just sit there. I raised another <a href="https://developercommunity.visualstudio.com/content/problem/158117/vsts-hosted-mac-agent-blocked-awaiting-two-factor.html?childToView=164132#comment-164132">issue</a>.</p>
+<p>Just over a week later I got a surprising answer: <strong>the preview hosted macOS agents won’t work with 2FA if you are outside of the USA.</strong></p>
+<p>So for anyone else who is looking at the new VSTS hosted macOS agents and doesn’t reside in the USA, perhaps hold off for now.</p>
+<p>You probably could turn off 2FA on your Apple Account to get round this, but I didn’t want to reduce the security on my team’s account which we use to publish to the App Store.</p>

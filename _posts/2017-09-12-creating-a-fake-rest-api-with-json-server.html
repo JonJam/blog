@@ -1,0 +1,28 @@
+---
+layout: post
+title: Creating a fake REST API with json-server
+tag:
+  - rest-api
+  - json-server
+  - mocking
+  - typescript
+excerpt: "How I combine json-server and json-schema-faker to spin up a fake REST API with randomly generated data, so I can build a front end without needing a real back end."
+---
+
+<p>A couple of months ago I watched a great Pluralsight course about <a href="https://app.pluralsight.com/library/courses/javascript-development-environment/table-of-contents">setting up a JavaScript development environment</a>; it introduced me to the idea of using a fake REST API during development.</p>
+<p>The main benefit of using a fake REST API is that it allows you to concentrate on building your app without the need to develop a fully fledged API at the same time to support it. This would be increasingly beneficial where separate teams are building the app and APIs, as this can prevent any potential blockers caused by the back-end not being ready in time for the front-end. Personally in my current side project, I am using a fake REST API in order that I can concentrate on what I wanted to learn which is building <a href="https://facebook.github.io/react/">React</a> apps.</p>
+<p>I am going to share with you how I created my fake REST API using two modules:</p>
+<ul><li><a href="https://github.com/typicode/json-server">json-server</a> which allows you to create a REST API supporting all the HTTP verbs by defining a JSON file containing the data you want to make available. Then as you use the API, any changes you make are automatically saved to this file.</li><li><a href="https://github.com/json-schema-faker/json-schema-faker">json-schema-faker</a> is a fake data generator that uses schemas you define using <a href="http://json-schema.org/">JSON Schema</a>.</li></ul>
+<p>Now why use these two modules together? Well by using json-schema-faker you can generate random sets of data and save that to a JSON file. Now if we use that JSON file as input to json-server, you now have an API that changes every time you start the server and helps you discover and develop your app to cover a wide range of scenarios e.g. no results, large list of results, short/long strings, high/low positive/negative numbers and anything else you could probably think of.</p>
+<p>Lets look at an example (the complete example can be found on my <a href="https://github.com/JonJam/fake-rest-api">GitHub</a>). Imagine we have an API for a Password Manager type app where you have Sites with information such as URL, Username and Password and Sites can be contained in Groups. First step is to define the JSON Schemas for Site and Group which looks as follows:</p>
+<figure><script src="https://gist.github.com/JonJam/fd8fe791cb9c6122009b11b0058fbec0.js"></script></figure>
+<p>A useful tool to help define your schemas is the <a href="http://json-schema-faker.js.org/#gist/eb11f16c9edccf040c028dc8bd2b1756">editor</a> on the json-schema-faker site. Now that we have these schemas defined we can use them with json-schema-faker to generate a JSON file.</p>
+<figure><script src="https://gist.github.com/JonJam/3ba268215891fa026301ecae4ccf1dde.js"></script></figure>
+<p>That’s all the code written, now we just need some npm scripts to call this build script and start json-server.</p>
+<pre>
+"generate-mock-api-data": "ts-node buildScripts/generateData.ts",
+"prestart": "npm run generate-mock-api-data",
+"start": "json-server --watch buildScripts/db.json --port 3000"
+</pre>
+<p>Just simply run the start script and now you have a REST API.</p>
+<p>All the code featured is from the complete example on <a href="https://github.com/JonJam/fake-rest-api">GitHub</a>.</p>
